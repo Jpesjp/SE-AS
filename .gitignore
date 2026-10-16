@@ -1,0 +1,15 @@
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/
+.idea/
+
+# Dependencias y compilados (si se agregan más adelante)
+node_modules/
+dist/
+
+# Variables de entorno y credenciales (por ejemplo, claves de Firebase)
+.env
+.env.*
