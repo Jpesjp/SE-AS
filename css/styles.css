@@ -368,7 +368,7 @@ button, input, select { font: inherit; color: inherit; }
 
 /* Módulos */
 .modules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
-.module { display: flex; flex-direction: column; gap: 10px; padding: 26px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); transition: border-color .2s, box-shadow .2s; }
+.modules--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } @media (max-width: 1000px) { .modules--3 { grid-template-columns: minmax(0, 1fr); } }
 .module:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
 .module__top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 4px; }
 .module h3 { font-size: 22px; }
