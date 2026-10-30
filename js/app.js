@@ -23,6 +23,16 @@
   var themeBtn = document.getElementById('theme-btn');
 
   /* ---------- Vistas ---------- */
+  // La consulta exige sesión iniciada (cuenta.js). Si no la hay, se
+  // recuerda a dónde se quería ir y se abre Ingresar.
+  function permitida(nombre) {
+    var cuenta = window.SenaPuente && window.SenaPuente.cuenta;
+    if (!cuenta || cuenta.puedeVer(nombre)) return true;
+    cuenta.recordar(nombre);
+    location.replace('#ingresar');
+    return false;
+  }
+
   function mostrarVista(nombre) {
     document.querySelectorAll('[data-view]').forEach(function (v) {
       v.hidden = v.dataset.view !== nombre;
@@ -45,6 +55,7 @@
     cerrarMenu();
 
     if (!id || VISTAS.indexOf(id) >= 0) {
+      if (!permitida(id || 'inicio')) return;
       mostrarVista(id || 'inicio');
       subirAlInicio();
       return;
@@ -54,6 +65,7 @@
     if (!destino) { mostrarVista('inicio'); subirAlInicio(); return; }
 
     var vista = destino.closest('[data-view]');
+    if (vista && !permitida(vista.dataset.view)) return;
     if (vista) mostrarVista(vista.dataset.view);
     destino.scrollIntoView({ block: 'start' });
   }

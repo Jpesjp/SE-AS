@@ -11,6 +11,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap">
   <link rel="stylesheet" href="css/styles.css">
+  <!-- Firebase (SDK compat para scripts clásicos): cuentas y perfil -->
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js" defer></script>
+  <script src="js/firebase-config.js" defer></script>
   <script src="js/vocabulario.js" defer></script>
   <script src="js/senas.js" defer></script>
   <script src="js/consulta.js" defer></script>
@@ -18,6 +23,7 @@
   <script src="js/voz.js" defer></script>
   <script src="js/frase.js" defer></script>
   <script src="js/microfono.js" defer></script>
+  <script src="js/cuenta.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
 <body>
@@ -39,6 +45,8 @@
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
   <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
   <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
@@ -85,7 +93,14 @@
         <button class="icon-btn" id="theme-btn" type="button" aria-label="Cambiar a modo oscuro">
           <svg class="ic ic--s" aria-hidden="true"><use href="#i-moon"/></svg>
         </button>
-        <a class="btn btn--ghost" href="#ingresar" data-nav="ingresar">Ingresar</a>
+        <a class="btn btn--ghost" href="#ingresar" data-nav="ingresar" id="nav-ingresar">Ingresar</a>
+        <div class="account" id="account" hidden>
+          <a class="account__chip" href="#ingresar" aria-label="Tu cuenta">
+            <svg class="ic ic--s" aria-hidden="true"><use href="#i-user"/></svg>
+            <span><strong id="account-nombre"></strong><small id="account-rol"></small></span>
+          </a>
+          <button class="btn btn--ghost account__out" type="button" data-salir title="Cerrar sesión"><svg class="ic ic--s" aria-hidden="true"><use href="#i-logout"/></svg><span class="account__out-txt">Salir</span></button>
+        </div>
         <a class="btn btn--sign" href="#consulta" data-nav="consulta">Iniciar consulta</a>
       </div>
     </nav>
@@ -225,7 +240,7 @@
           </details>
           <details class="qa">
             <summary>¿Se guardan los datos de la consulta?<svg class="ic ic--s" aria-hidden="true"><use href="#i-plus"/></svg></summary>
-            <p>No. El historial existe solo mientras la página está abierta y se borra al finalizar la consulta.</p>
+            <p>La conversación no. El historial existe solo mientras la página está abierta y se borra al finalizar la consulta. Para tu cuenta guardamos únicamente tu nombre, tu correo y tu rol.</p>
           </details>
         </div>
       </div>
@@ -252,32 +267,94 @@
       <div class="auth__intro">
         <nav class="crumbs" aria-label="Ruta"><a href="#inicio">Inicio</a><span aria-hidden="true">/</span><span aria-current="page">Ingresar</span></nav>
         <h1 id="t-auth">Ingresa a la consulta.</h1>
-        <p>Elige tu rol para ver la interfaz adecuada. El profesional controla el micrófono; el paciente ve el texto ampliado.</p>
-        <p class="notice notice--soft"><svg class="ic ic--s" aria-hidden="true"><use href="#i-info"/></svg><span>Las cuentas estarán disponibles pronto. Por ahora puedes continuar sin iniciar sesión.</span></p>
+        <p>Cada cuenta tiene un rol. El profesional controla el micrófono; el paciente arma sus mensajes con señas y lee el texto ampliado.</p>
+        <p class="notice notice--soft" id="auth-aviso" role="status" hidden><svg class="ic ic--s" aria-hidden="true"><use href="#i-info"/></svg><span id="auth-aviso-texto"></span></p>
+        <ul class="auth__facts">
+          <li><svg class="ic ic--s" aria-hidden="true"><use href="#i-shield"/></svg>Solo guardamos tu nombre, tu correo y tu rol.</li>
+          <li><svg class="ic ic--s" aria-hidden="true"><use href="#i-trash"/></svg>La conversación nunca se guarda: se borra al finalizar la consulta.</li>
+          <li><svg class="ic ic--s" aria-hidden="true"><use href="#i-lock"/></svg>La sesión se cierra sola al cerrar la pestaña.</li>
+        </ul>
       </div>
-      <form class="card auth__form" id="login-form" novalidate>
-        <fieldset class="roles">
-          <legend>¿Con qué rol ingresas?</legend>
-          <label class="role-opt p-voice">
-            <input type="radio" name="rol" value="profesional" checked>
-            <span class="role-opt__box"><span class="disc"><svg class="ic" aria-hidden="true"><use href="#i-stetho"/></svg></span><span><strong>Profesional de salud</strong><small>Habla y lee la traducción de señas</small></span></span>
-          </label>
-          <label class="role-opt p-sign">
-            <input type="radio" name="rol" value="paciente">
-            <span class="role-opt__box"><span class="disc"><svg class="ic" aria-hidden="true"><use href="#i-hand"/></svg></span><span><strong>Paciente</strong><small>Hace señas y lee con texto ampliado</small></span></span>
-          </label>
-        </fieldset>
-        <div class="form-field">
-          <label for="login-email">Correo electrónico</label>
-          <input class="input" id="login-email" type="email" autocomplete="email" placeholder="nombre@correo.com">
+
+      <!-- Con sesión iniciada -->
+      <div class="card auth__form" id="auth-sesion" hidden>
+        <span class="disc disc--sign"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg></span>
+        <div>
+          <p class="eyebrow">Sesión iniciada</p>
+          <h2 class="auth__who" id="sesion-nombre"></h2>
+          <p class="muted" id="sesion-rol"></p>
         </div>
-        <div class="form-field">
-          <label for="login-pass">Contraseña</label>
-          <input class="input" id="login-pass" type="password" autocomplete="current-password" placeholder="Tu contraseña">
+        <a class="btn btn--sign btn--lg btn--block" href="#consulta"><svg class="ic ic--s" aria-hidden="true"><use href="#i-arrow"/></svg>Ir a la consulta</a>
+        <button class="btn btn--ghost btn--block" type="button" data-salir><svg class="ic ic--s" aria-hidden="true"><use href="#i-logout"/></svg>Cerrar sesión</button>
+      </div>
+
+      <!-- Sin sesión: iniciar sesión o crear cuenta -->
+      <div class="card auth__form" id="auth-forms">
+        <div class="tabs" role="tablist" aria-label="Cuenta">
+          <button type="button" role="tab" id="tab-ingresar" data-auth-tab="ingresar" aria-controls="login-form" aria-selected="true">Iniciar sesión</button>
+          <button type="button" role="tab" id="tab-registro" data-auth-tab="registro" aria-controls="registro-form" aria-selected="false" tabindex="-1">Crear cuenta</button>
         </div>
-        <button class="btn btn--sign btn--lg btn--block" type="submit"><svg class="ic ic--s" aria-hidden="true"><use href="#i-login"/></svg>Continuar a la consulta</button>
-        
-      </form>
+
+        <form class="auth__panel" id="login-form" role="tabpanel" aria-labelledby="tab-ingresar" novalidate>
+          <div class="form-field">
+            <label for="login-email">Correo electrónico</label>
+            <input class="input" id="login-email" type="email" autocomplete="email" placeholder="nombre@correo.com" required>
+          </div>
+          <div class="form-field">
+            <label for="login-pass">Contraseña</label>
+            <input class="input" id="login-pass" type="password" autocomplete="current-password" placeholder="Tu contraseña" required>
+          </div>
+          <button class="link-btn auth__forgot" type="button" id="login-olvido">¿Olvidaste tu contraseña?</button>
+          <p class="form-error" id="login-error" role="alert" hidden></p>
+          <button class="btn btn--sign btn--lg btn--block" type="submit"><svg class="ic ic--s" aria-hidden="true"><use href="#i-login"/></svg>Iniciar sesión</button>
+        </form>
+
+        <form class="auth__panel" id="registro-form" role="tabpanel" aria-labelledby="tab-registro" novalidate hidden>
+          <fieldset class="roles">
+            <legend>¿Con qué rol te registras?</legend>
+            <label class="role-opt p-voice">
+              <input type="radio" name="rol" value="profesional" checked>
+              <span class="role-opt__box"><span class="disc"><svg class="ic" aria-hidden="true"><use href="#i-stetho"/></svg></span><span><strong>Profesional de salud</strong><small>Habla y lee la traducción de señas</small></span></span>
+            </label>
+            <label class="role-opt p-sign">
+              <input type="radio" name="rol" value="paciente">
+              <span class="role-opt__box"><span class="disc"><svg class="ic" aria-hidden="true"><use href="#i-hand"/></svg></span><span><strong>Paciente</strong><small>Hace señas y lee con texto ampliado</small></span></span>
+            </label>
+          </fieldset>
+          <div class="form-field">
+            <label for="reg-nombre">Nombre completo</label>
+            <input class="input" id="reg-nombre" type="text" autocomplete="name" maxlength="100" required>
+          </div>
+          <div class="form-field">
+            <label for="reg-email">Correo electrónico</label>
+            <input class="input" id="reg-email" type="email" autocomplete="email" placeholder="nombre@correo.com" required>
+          </div>
+          <div class="form-field">
+            <label for="reg-pass">Contraseña</label>
+            <input class="input" id="reg-pass" type="password" autocomplete="new-password" minlength="8" aria-describedby="reg-pass-ayuda" required>
+            <small class="form-hint" id="reg-pass-ayuda">Mínimo 8 caracteres.</small>
+          </div>
+          <div class="form-field">
+            <label for="reg-pass2">Repite la contraseña</label>
+            <input class="input" id="reg-pass2" type="password" autocomplete="new-password" required>
+          </div>
+          <div class="consent">
+            <label class="check check--top"><input type="checkbox" id="reg-consent" required><span>Autorizo a SeñaPuente a tratar mi nombre, correo y rol para crear y usar mi cuenta, conforme a la Ley 1581 de 2012.</span></label>
+            <details class="consent__more">
+              <summary>Cómo tratamos tus datos</summary>
+              <ul>
+                <li><strong>Qué guardamos:</strong> nombre, correo, rol y la fecha en que diste esta autorización.</li>
+                <li><strong>Qué no guardamos:</strong> audio, video ni el texto de la consulta. El historial se borra al finalizar.</li>
+                <li><strong>Para qué:</strong> identificarte al iniciar sesión y mostrarte la vista que corresponde a tu rol.</li>
+                <li><strong>Tus derechos:</strong> puedes conocer, actualizar o pedir que se eliminen tus datos escribiendo al equipo del proyecto.</li>
+                <li>Proyecto académico de la Universidad Manuela Beltrán. Los datos se alojan en Firebase (Google).</li>
+              </ul>
+            </details>
+          </div>
+          <p class="form-error" id="reg-error" role="alert" hidden></p>
+          <button class="btn btn--sign btn--lg btn--block" type="submit"><svg class="ic ic--s" aria-hidden="true"><use href="#i-user"/></svg>Crear cuenta</button>
+        </form>
+      </div>
     </section>
   </div>
 

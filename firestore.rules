@@ -1,0 +1,47 @@
+rules_version = '2';
+
+// Reglas de seguridad de Firestore para SeñaPuente.
+// Copiar en: consola de Firebase → Firestore Database → Reglas → Publicar.
+//
+// - Cada persona solo puede leer y crear SU propio perfil (usuarios/{uid}).
+// - El perfil solo admite nombre, rol, autorización de datos y fecha de creación.
+// - El rol no se puede cambiar después del registro (un paciente no puede
+//   volverse profesional editando su perfil).
+// - Cualquier otra colección está cerrada.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /usuarios/{uid} {
+      function esDueno() {
+        return request.auth != null && request.auth.uid == uid;
+      }
+      function nombreValido(n) {
+        return n is string && n.size() >= 3 && n.size() <= 100;
+      }
+
+      allow read: if esDueno();
+
+      allow create: if esDueno()
+        && request.resource.data.keys().hasOnly(['nombre', 'rol', 'consentimiento', 'creado'])
+        && nombreValido(request.resource.data.nombre)
+        && request.resource.data.rol in ['paciente', 'profesional']
+        && request.resource.data.consentimiento.keys().hasOnly(['aceptado', 'version', 'fecha'])
+        && request.resource.data.consentimiento.aceptado == true
+        && request.resource.data.consentimiento.version is string
+        && request.resource.data.consentimiento.fecha == request.time
+        && request.resource.data.creado == request.time;
+
+      // Solo se puede corregir el nombre.
+      allow update: if esDueno()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nombre'])
+        && nombreValido(request.resource.data.nombre);
+
+      // Derecho de supresión (Ley 1581): la persona puede borrar su perfil.
+      allow delete: if esDueno();
+    }
+
+    match /{documento=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -5,7 +5,6 @@
      (mensajes del paciente).
    - Indicador de confianza baja (RF-07).
    - Vista profesional / paciente (RF-03).
-   - Formulario de ingreso (RF-01, RF-02: interfaz, sin backend).
    - Finalizar consulta y borrar el historial (RF-14).
    ========================================================== */
 (function () {
@@ -175,16 +174,6 @@
     r.addEventListener('change', function () { aplicarVista(r.value); });
   });
   SP.aplicarVista = aplicarVista;
-
-  /* ---------- Ingreso (interfaz de RF-01 y RF-02) ---------- */
-  var formIngreso = document.getElementById('login-form');
-  formIngreso.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var rol = formIngreso.querySelector('input[name="rol"]:checked').value;
-    aplicarVista(rol);
-    location.hash = 'consulta';
-    toast(rol === 'paciente' ? 'Ingresaste como paciente.' : 'Ingresaste como profesional de salud.');
-  });
 
   /* ---------- Finalizar consulta (RF-14) ---------- */
   var dialogo = document.getElementById('end-dialog');
