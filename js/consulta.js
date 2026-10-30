@@ -1,7 +1,8 @@
 /* ==========================================================
    SeñaPuente · consulta.js
    - Historial de la consulta (RF-13): API SenaPuente.chat que
-     usa microfono.js para escribir los mensajes en vivo.
+     usan microfono.js (voz del profesional) y frase.js
+     (mensajes del paciente).
    - Indicador de confianza baja (RF-07).
    - Vista profesional / paciente (RF-03).
    - Formulario de ingreso (RF-01, RF-02: interfaz, sin backend).
@@ -16,6 +17,7 @@
   var chat = document.getElementById('chat');
   var vacio = document.getElementById('chat-empty');
   var plantillaVoz = document.getElementById('tpl-voice');
+  var plantillaSena = document.getElementById('tpl-sena');
   var toastEl = document.getElementById('toast');
 
   var UMBRAL_CONFIANZA = 0.6; // por debajo de 60 % se pide repetir (RF-07)
@@ -110,6 +112,45 @@
       }
       bajar();
       return texto;
+    },
+
+    // Mensaje del paciente (RF-10, RF-13). origen: 'botones' (señas
+    // rápidas) o 'camara' (reconocimiento por video, capa siguiente).
+    // Se muestra la glosa de las señas y la frase en español.
+    agregarSena: function (datos) {
+      iniciarConsultaEnVivo();
+      var fila = plantillaSena.content.firstElementChild.cloneNode(true);
+      var burbuja = fila.querySelector('.bubble');
+      fila.querySelector('.bubble__chan').textContent = datos.origen === 'camara'
+        ? 'Paciente · seña → texto + voz'
+        : 'Paciente · señas rápidas';
+      fila.querySelector('time').textContent = hora();
+      fila.querySelector('.gloss').textContent = datos.glosa || '';
+      fila.querySelector('p').textContent = datos.texto;
+
+      if (typeof datos.confianza === 'number' && datos.confianza > 0) {
+        var etiqueta = document.createElement('span');
+        etiqueta.className = 'conf';
+        etiqueta.textContent = 'Confianza ' + Math.round(datos.confianza * 100) + '%';
+        burbuja.querySelector('.bubble__meta').insertBefore(etiqueta, burbuja.querySelector('.bubble__play'));
+      }
+
+      var play = fila.querySelector('.bubble__play');
+      if (SP.voz && SP.voz.disponible) {
+        play.addEventListener('click', function () { SP.voz.hablar(datos.texto, { forzar: true }); });
+      } else {
+        play.remove();
+      }
+
+      chat.appendChild(fila);
+      // Si el micrófono tiene una burbuja abierta todavía vacía, se pasa al
+      // final para que lo próximo que diga el profesional quede en orden.
+      var vivo = chat.querySelector('.bubble.is-live');
+      if (vivo && !vivo.querySelector('p').textContent) chat.appendChild(vivo.closest('.row'));
+
+      actualizarVacio();
+      bajar(true);
+      return fila;
     },
 
     descartar: function (fila) {
