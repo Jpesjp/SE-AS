@@ -1,30 +1,13 @@
 /* ==========================================================
    SeñaPuente · senas.js
-   Guía de señas clínicas (RF-11): datos, tarjetas, búsqueda
-   y filtro por tipo. Para añadir una seña, agrega un objeto a
-   la lista SENAS. La lista es preliminar: el conjunto final se
-   definirá con entrevistas (objetivo específico 1).
+   Guía de señas clínicas (RF-11): tarjetas, búsqueda y filtro
+   por tipo. Los datos vienen de vocabulario.js (Anexo A); para
+   añadir una seña se edita ese archivo, no este.
    ========================================================== */
 (function () {
   'use strict';
 
-  var SENAS = [
-    { nombre: 'Sí', tipo: 'Respuestas', uso: 'Respuesta afirmativa a una pregunta del profesional.' },
-    { nombre: 'No', tipo: 'Respuestas', uso: 'Respuesta negativa a una pregunta del profesional.' },
-    { nombre: 'No entiendo', tipo: 'Respuestas', uso: 'El paciente no comprendió la indicación y necesita que se explique de otra forma.' },
-    { nombre: 'Repetir', tipo: 'Respuestas', uso: 'Pide al profesional que repita lo que acaba de decir.' },
-    { nombre: 'Dolor', tipo: 'Síntomas', uso: 'Indica que algo duele. Se combina con la parte del cuerpo afectada.' },
-    { nombre: 'Fiebre', tipo: 'Síntomas', uso: 'Temperatura alta o sensación de calor en el cuerpo.' },
-    { nombre: 'Mareo', tipo: 'Síntomas', uso: 'Sensación de inestabilidad o de que todo da vueltas.' },
-    { nombre: 'Náuseas', tipo: 'Síntomas', uso: 'Ganas de vomitar o malestar en el estómago.' },
-    { nombre: 'Tos', tipo: 'Síntomas', uso: 'Tos seca o con flema. Puede acompañarse del tiempo que lleva.' },
-    { nombre: 'Cabeza', tipo: 'Partes del cuerpo', uso: 'Ubica un síntoma en la cabeza, por ejemplo, dolor de cabeza.' },
-    { nombre: 'Estómago', tipo: 'Partes del cuerpo', uso: 'Ubica un síntoma en el estómago o el abdomen.' },
-    { nombre: 'Pecho', tipo: 'Partes del cuerpo', uso: 'Ubica un síntoma en el pecho, como dolor o presión.' },
-    { nombre: 'Garganta', tipo: 'Partes del cuerpo', uso: 'Ubica un síntoma en la garganta, como dolor o ardor al tragar.' },
-    { nombre: 'Ayuda', tipo: 'Necesidades', uso: 'Pide asistencia inmediata.' },
-    { nombre: 'Medicamento', tipo: 'Necesidades', uso: 'Pregunta por un medicamento o indica que toma alguno.' }
-  ];
+  var SENAS = window.SenaPuente.vocabulario.senas;
 
   var grid = document.getElementById('sign-grid');
   var plantilla = document.getElementById('tpl-sign');

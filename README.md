@@ -27,13 +27,32 @@ senapuente/
 ├── css/
 │   └── styles.css    Estilos (los colores están en las variables del inicio)
 └── js/
-    ├── senas.js      Guía de señas clínicas: datos, búsqueda y filtros (RF-11)
-    ├── consulta.js   Historial, vista paciente/profesional, ingreso y fin de consulta
-    ├── microfono.js  Reconocimiento de voz que escribe en el historial (RF-04 a RF-07)
-    └── app.js        Navegación entre vistas, menú móvil y modo claro/oscuro
+    ├── vocabulario.js  Vocabulario de señas clínicas (Anexo A): fuente única de datos
+    ├── senas.js        Guía de señas: tarjetas, búsqueda y filtros (RF-11)
+    ├── consulta.js     Historial, vista paciente/profesional, ingreso y fin de consulta
+    ├── ajustes.js      Accesibilidad: tamaño de texto, contraste y voz (RF-15)
+    ├── voz.js          Lectura en voz alta de los mensajes del paciente (TTS, RF-10)
+    ├── frase.js        Mensaje del paciente: señas → frase en español → historial (RF-10, RF-12)
+    ├── microfono.js    Reconocimiento de voz que escribe en el historial (RF-04 a RF-07)
+    └── app.js          Navegación entre vistas, menú móvil y modo claro/oscuro
 ```
 
-Los scripts son clásicos (no módulos ES) para que funcionen al abrir el archivo sin servidor. Se cargan con `defer` en este orden: `senas.js`, `consulta.js`, `microfono.js`, `app.js`.
+Los scripts son clásicos (no módulos ES) para que funcionen al abrir el archivo sin servidor. Se cargan con `defer` en este orden: `vocabulario.js`, `senas.js`, `consulta.js`, `ajustes.js`, `voz.js`, `frase.js`, `microfono.js`, `app.js`.
+
+### Cómo se arma el mensaje del paciente
+
+El paciente toca señas del vocabulario y la aplicación las convierte en una frase con reglas simples (`redactar` en `js/frase.js`), sin inventar contenido. En el historial se muestran la glosa y la frase:
+
+| Señas | Frase |
+|---|---|
+| DOLOR · CABEZA · FIEBRE | Tengo dolor de cabeza y fiebre. |
+| ME-DUELE · ESPALDA · DESDE-HACE 3 DÍA | Me duele la espalda desde hace 3 días. |
+| SÍ · DOLOR · PECHO | Sí. Tengo dolor de pecho. |
+| REPETIR | ¿Puede repetirlo, por favor? |
+
+La misma bandeja recibirá las señas que reconozca la cámara (`SenaPuente.frase.agregar(id)`), así que el texto y la voz no cambian cuando llegue ese módulo.
+
+Como paciente y profesional usan el mismo equipo, el micrófono se pausa mientras se lee un mensaje en voz alta, para no transcribir el sonido del parlante.
 
 ## Estado frente al SRS v1.1
 
@@ -48,21 +67,22 @@ Los scripts son clásicos (no módulos ES) para que funcionen al abrir el archiv
 | RF-07 | Indicador de confianza | Funciona: se muestra el % y se marca si es menor a 60 % |
 | RF-08 | Captura de video | Pendiente |
 | RF-09 | Reconocimiento de señas | Pendiente (MediaPipe, OpenCV, TensorFlow) |
-| RF-10 | Traducción de señas a texto/voz | Pendiente |
-| RF-11 | Guía de señas disponibles | Funciona con una lista preliminar |
-| RF-12 | Comunicación bidireccional en tiempo real | Parcial: solo el sentido voz → texto |
+| RF-10 | Traducción de señas a texto/voz | Parcial: las señas elegidas con botones se convierten en texto y voz; falta que lleguen desde la cámara |
+| RF-11 | Guía de señas disponibles | Funciona con el vocabulario del Anexo A (20 señas) |
+| RF-12 | Comunicación bidireccional en tiempo real | Funciona en ambos sentidos: voz → texto y señas (botones) → texto + voz |
 | RF-13 | Historial de conversación | Funciona durante la sesión |
 | RF-14 | Finalización de sesión | Funciona: borra el historial temporal |
-| RF-15 | Configuración de accesibilidad | Parcial: modo oscuro y texto ampliado en la vista paciente |
+| RF-15 | Configuración de accesibilidad | Funciona: tamaño de texto, contraste alto, lectura en voz alta, velocidad y voz |
 
 ### Notas sobre requerimientos no funcionales
 
 - **RNF-03 (WCAG 2.1 AA):** contraste revisado en modo claro y oscuro, navegación con teclado y etiquetas en todos los controles.
 - **RNF-05 (Chrome, Edge y Firefox):** Firefox no incluye la Web Speech API. Para cumplirlo habrá que integrar otro motor de reconocimiento de voz.
-- **RNF-06 (mantenibilidad):** cada módulo está en su propio archivo; agregar una seña a la guía es añadir un objeto en `js/senas.js`.
+- **RNF-06 (mantenibilidad):** cada módulo está en su propio archivo; agregar una seña es añadir un objeto en `js/vocabulario.js` y aparece en la guía y en las señas rápidas.
 
 ## Próximos pasos
 
-1. Captura de video y reconocimiento de señas con MediaPipe (RF-08 a RF-10).
-2. Lectura en voz alta de las señas traducidas con síntesis de voz (TTS).
-3. Registro e inicio de sesión con Firebase (RF-01, RF-02).
+1. Captura de video con la cámara y puntos de la mano con MediaPipe (RF-08).
+2. Herramienta para grabar muestras de cada seña y entrenar el modelo.
+3. Reconocimiento de señas conectado a la bandeja del paciente (RF-09, RF-10).
+4. Registro e inicio de sesión con Firebase (RF-01, RF-02).

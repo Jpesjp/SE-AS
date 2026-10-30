@@ -11,8 +11,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap">
   <link rel="stylesheet" href="css/styles.css">
+  <script src="js/vocabulario.js" defer></script>
   <script src="js/senas.js" defer></script>
   <script src="js/consulta.js" defer></script>
+  <script src="js/ajustes.js" defer></script>
+  <script src="js/voz.js" defer></script>
+  <script src="js/frase.js" defer></script>
   <script src="js/microfono.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
@@ -34,6 +38,8 @@
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
   <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
@@ -188,9 +194,9 @@
             <p>Lo que dice el profesional aparece escrito mientras habla. Si una frase no se entendió bien, la aplicación pide repetirla.</p>
           </article>
           <article class="module feature--sign">
-            <div class="module__top"><span class="disc"><svg class="ic" aria-hidden="true"><use href="#i-hand"/></svg></span><span class="state">Próximamente</span></div>
+            <div class="module__top"><span class="disc"><svg class="ic" aria-hidden="true"><use href="#i-hand"/></svg></span><span class="state state--preview">En desarrollo</span></div>
             <h3>Señas a texto y voz</h3>
-            <p>La cámara reconocerá señas clínicas básicas, como síntomas, dolor y partes del cuerpo.</p>
+            <p>El paciente arma su mensaje con señas clínicas básicas y la aplicación lo escribe y lo lee en voz alta. El reconocimiento por cámara viene en camino.</p>
           </article>
           <article class="module feature--ok">
             <div class="module__top"><span class="disc"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span><span class="state state--on">Disponible</span></div>
@@ -292,6 +298,7 @@
               <input type="radio" name="vista" id="vista-pro" value="profesional" checked><label for="vista-pro"><svg class="ic ic--xs" aria-hidden="true"><use href="#i-stetho"/></svg>Profesional</label>
               <input type="radio" name="vista" id="vista-pac" value="paciente"><label for="vista-pac"><svg class="ic ic--xs" aria-hidden="true"><use href="#i-hand"/></svg>Paciente</label>
             </div>
+            <button class="btn btn--ghost" type="button" id="a11y-btn" aria-haspopup="dialog"><svg class="ic ic--s" aria-hidden="true"><use href="#i-sliders"/></svg>Accesibilidad</button>
             <a class="btn btn--ghost" href="#senas"><svg class="ic ic--s" aria-hidden="true"><use href="#i-book"/></svg>Guía de señas</a>
             <button class="btn btn--danger" type="button" id="end-btn"><svg class="ic ic--s" aria-hidden="true"><use href="#i-trash"/></svg>Finalizar consulta</button>
           </div>
@@ -323,17 +330,18 @@
               <span class="pill pill--ok"><svg class="ic ic--xs" aria-hidden="true"><use href="#i-check"/></svg>91%</span>
             </div>
           </div>
-          <span class="sub">Señas rápidas</span>
-          <div class="chips">
-            <button class="chip" type="button"><svg class="ic ic--s" aria-hidden="true"><use href="#i-hand"/></svg>Sí</button>
-            <button class="chip" type="button"><svg class="ic ic--s" aria-hidden="true"><use href="#i-hand"/></svg>No</button>
-            <button class="chip" type="button"><svg class="ic ic--s" aria-hidden="true"><use href="#i-hand"/></svg>Dolor</button>
-            <button class="chip" type="button"><svg class="ic ic--s" aria-hidden="true"><use href="#i-hand"/></svg>Fiebre</button>
-            <button class="chip" type="button"><svg class="ic ic--s" aria-hidden="true"><use href="#i-hand"/></svg>Mareo</button>
-            <button class="chip" type="button"><svg class="ic ic--s" aria-hidden="true"><use href="#i-hand"/></svg>Cabeza</button>
-            <button class="chip" type="button"><svg class="ic ic--s" aria-hidden="true"><use href="#i-hand"/></svg>Estómago</button>
-            <button class="chip" type="button"><svg class="ic ic--s" aria-hidden="true"><use href="#i-hand"/></svg>No entiendo</button>
-            <button class="chip" type="button"><svg class="ic ic--s" aria-hidden="true"><use href="#i-hand"/></svg>Repetir</button>
+          <div class="tray-card" id="frase">
+            <div class="tray-card__head">
+              <span class="sub" id="t-frase">Tu mensaje</span>
+              <button class="link-btn" type="button" id="frase-borrar" hidden>Borrar todo</button>
+            </div>
+            <ul class="tray" id="frase-tray" aria-labelledby="t-frase"></ul>
+            <p class="tray__empty" id="frase-vacia">Toca las señas de abajo para armar tu mensaje.</p>
+            <p class="tray__preview" id="frase-preview" hidden></p>
+            <button class="btn btn--sign btn--lg btn--block" type="button" id="frase-enviar" disabled><svg class="ic ic--s" aria-hidden="true"><use href="#i-send"/></svg>Enviar al profesional</button>
+          </div>
+          <div class="quick" id="senas-rapidas">
+            <span class="sub">Señas rápidas</span>
           </div>
         </section>
 
@@ -349,7 +357,7 @@
           <div class="chat" id="chat" aria-live="polite">
             <div class="chat-empty" id="chat-empty" hidden>
               <svg class="ic" aria-hidden="true"><use href="#i-msg"/></svg>
-              <p><strong>La consulta está vacía.</strong> Toca el micrófono y habla: tus palabras aparecerán aquí.</p>
+              <p><strong>La consulta está vacía.</strong> Cuando el profesional hable o el paciente envíe un mensaje, aparecerá aquí.</p>
             </div>
             <p class="chat-divider" data-ejemplo>Conversación de ejemplo · se borra al usar el micrófono</p>
             <div class="row row--voz" data-ejemplo><article class="bubble bubble--voz"><header class="bubble__meta"><svg class="ic ic--xs" aria-hidden="true"><use href="#i-stetho"/></svg><span class="bubble__chan">Profesional · voz → texto</span><time>10:01</time></header><p>Buenos días. Cuénteme, ¿qué síntomas tiene?</p></article></div>
@@ -410,6 +418,67 @@
         </div>
       </form>
     </dialog>
+
+    <!-- Desde hace… (cantidad y unidad) -->
+    <dialog class="dialog" id="duracion-dialog" aria-labelledby="t-duracion">
+      <form method="dialog" class="dialog__body">
+        <h2 id="t-duracion">¿Desde hace cuánto?</h2>
+        <div class="stepper" role="group" aria-label="Cantidad">
+          <button class="icon-btn" type="button" id="dur-menos" aria-label="Menos"><svg class="ic" aria-hidden="true"><use href="#i-minus"/></svg></button>
+          <output id="dur-valor">1</output>
+          <button class="icon-btn" type="button" id="dur-mas" aria-label="Más"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        </div>
+        <div class="seg" role="radiogroup" aria-label="Unidad de tiempo">
+          <input type="radio" name="dur-unidad" id="dur-horas" value="horas"><label for="dur-horas">Horas</label>
+          <input type="radio" name="dur-unidad" id="dur-dias" value="dias" checked><label for="dur-dias">Días</label>
+        </div>
+        <p class="dur-preview" id="dur-preview" aria-live="polite">Desde hace un día</p>
+        <div class="dialog__actions">
+          <button class="btn btn--ghost" value="cancelar" type="submit">Cancelar</button>
+          <button class="btn btn--sign" value="agregar" type="submit">Agregar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Accesibilidad (RF-15) -->
+    <dialog class="dialog dialog--wide" id="a11y-dialog" aria-labelledby="t-a11y">
+      <form method="dialog" class="dialog__body">
+        <h2 id="t-a11y">Accesibilidad</h2>
+        <p>Los cambios se aplican de inmediato y se recuerdan en este equipo.</p>
+        <fieldset class="opt-group">
+          <legend>Tamaño del texto</legend>
+          <div class="seg">
+            <input type="radio" name="a11y-texto" id="a11y-texto-normal" value="normal"><label for="a11y-texto-normal">Normal</label>
+            <input type="radio" name="a11y-texto" id="a11y-texto-grande" value="grande"><label for="a11y-texto-grande">Grande</label>
+            <input type="radio" name="a11y-texto" id="a11y-texto-muy" value="muy-grande"><label for="a11y-texto-muy">Muy grande</label>
+          </div>
+        </fieldset>
+        <fieldset class="opt-group">
+          <legend>Contraste</legend>
+          <div class="seg">
+            <input type="radio" name="a11y-contraste" id="a11y-contraste-normal" value="normal"><label for="a11y-contraste-normal">Normal</label>
+            <input type="radio" name="a11y-contraste" id="a11y-contraste-alto" value="alto"><label for="a11y-contraste-alto">Alto</label>
+          </div>
+        </fieldset>
+        <fieldset class="opt-group" id="a11y-voz-grupo">
+          <legend>Lectura en voz alta</legend>
+          <label class="check"><input type="checkbox" id="a11y-voz"><span>Leer en voz alta los mensajes del paciente</span></label>
+          <div class="form-field">
+            <label for="a11y-vel">Velocidad <output id="a11y-vel-out" for="a11y-vel">1,0×</output></label>
+            <input class="range" type="range" id="a11y-vel" min="0.5" max="1.5" step="0.1">
+          </div>
+          <div class="form-field">
+            <label for="a11y-voz-nombre">Voz</label>
+            <select class="select" id="a11y-voz-nombre"><option value="">Automática (español)</option></select>
+          </div>
+          <button class="btn btn--ghost" type="button" id="a11y-probar"><svg class="ic ic--s" aria-hidden="true"><use href="#i-speaker"/></svg>Probar voz</button>
+        </fieldset>
+        <p class="notice notice--soft" id="a11y-sin-voz" hidden><svg class="ic ic--s" aria-hidden="true"><use href="#i-info"/></svg><span>Este navegador no puede leer en voz alta. Usa Chrome o Edge.</span></p>
+        <div class="dialog__actions">
+          <button class="btn btn--sign" value="listo" type="submit">Listo</button>
+        </div>
+      </form>
+    </dialog>
   </div>
 
   <!-- ===================================================== -->
@@ -431,10 +500,9 @@
         <label class="field field--search" for="dict-search"><svg class="ic ic--s" aria-hidden="true"><use href="#i-search"/></svg><span class="sr-only">Buscar una seña</span><input id="dict-search" type="search" placeholder="Buscar una seña" autocomplete="off"></label>
         <div class="cats" role="group" aria-label="Filtrar por tipo">
           <button class="cat" type="button" data-cat="Todas" aria-pressed="true">Todas</button>
-          <button class="cat" type="button" data-cat="Respuestas" aria-pressed="false">Respuestas</button>
           <button class="cat" type="button" data-cat="Síntomas" aria-pressed="false">Síntomas</button>
           <button class="cat" type="button" data-cat="Partes del cuerpo" aria-pressed="false">Partes del cuerpo</button>
-          <button class="cat" type="button" data-cat="Necesidades" aria-pressed="false">Necesidades</button>
+          <button class="cat" type="button" data-cat="Expresiones del paciente" aria-pressed="false">Expresiones del paciente</button>
         </div>
         <p class="dict__count" id="dict-count" aria-live="polite"></p>
       </div>
@@ -494,6 +562,10 @@
     <p></p>
     <button class="btn btn--ghost" type="button" aria-disabled="true" title="Próximamente"><svg class="ic ic--s" aria-hidden="true"><use href="#i-play"/></svg>Video · próximamente</button>
   </article>
+</template>
+
+<template id="tpl-sena">
+  <div class="row row--sena"><article class="bubble bubble--sena is-new"><header class="bubble__meta"><svg class="ic ic--xs" aria-hidden="true"><use href="#i-hand"/></svg><span class="bubble__chan"></span><time></time><button class="bubble__play" type="button" aria-label="Escuchar el mensaje" title="Escuchar"><svg class="ic ic--xs" aria-hidden="true"><use href="#i-speaker"/></svg></button></header><span class="gloss"></span><p></p></article></div>
 </template>
 
 <template id="tpl-voice">

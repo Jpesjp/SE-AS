@@ -11,6 +11,7 @@
      7. App de conversación
      8. Guía de señas
      9. Movimiento reducido
+    10. Accesibilidad: tamaño de texto y contraste alto (RF-15)
    ========================================================== */
 
 /* ---------- 1. Variables ---------- */
@@ -145,6 +146,7 @@ button, input, select { font: inherit; color: inherit; }
   border-radius: 12px; border: 1px solid var(--line); background: var(--surface); cursor: pointer;
 }
 .icon-btn:hover { background: var(--sunken); }
+.icon-btn:disabled { opacity: .4; cursor: not-allowed; }
 
 .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--sign); }
 .dot { width: 9px; height: 9px; border-radius: 999px; background: currentColor; flex: none; }
@@ -499,14 +501,14 @@ button, input, select { font: inherit; color: inherit; }
 .bubble__meta .ic, .bubble__chan { color: var(--accent); }
 .bubble__chan { font-weight: 700; }
 .bubble__meta time { color: var(--muted); font-variant-numeric: tabular-nums; }
-.bubble p { font-size: 18px; line-height: 1.38; }
+.bubble p { font-size: calc(18px * var(--escala, 1)); line-height: 1.38; }
 .bubble.is-new { animation: pop .35s ease-out; }
 @keyframes pop { from { transform: translateY(6px); opacity: .4; } to { transform: none; opacity: 1; } }
 .composer { display: flex; gap: 10px; align-items: center; }
 .composer .field { flex: 1; background: var(--sunken); }
 
 /* Mensajes: glosa de señas, confianza, burbuja en vivo y confianza baja */
-.gloss { font-family: var(--f-display); font-size: 13px; font-weight: 700; letter-spacing: .04em; color: var(--sign); }
+.gloss { font-family: var(--f-display); font-size: calc(13px * var(--escala, 1)); font-weight: 700; letter-spacing: .04em; color: var(--sign); }
 .conf { margin-left: auto; white-space: nowrap; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--surface) 70%, transparent); color: var(--muted); font-weight: 700; font-size: 12px; font-variant-numeric: tabular-nums; }
 .bubble.is-live { outline: 2px dashed var(--voice); outline-offset: -2px; }
 .bubble.is-live time { color: var(--voice); font-weight: 700; }
@@ -515,6 +517,45 @@ button, input, select { font: inherit; color: inherit; }
 .bubble__warn { display: flex; align-items: center; gap: 6px; font-size: 14px !important; font-weight: 700; color: var(--danger); }
 .chat-empty { display: flex; align-items: center; gap: 14px; margin: auto 0; padding: 24px; border-radius: 16px; border: 1.5px dashed var(--line); color: var(--muted); }
 .chat-empty .ic { flex: none; width: 32px; height: 32px; color: var(--sign); }
+
+/* Panel del paciente: mensaje en construcción y señas rápidas */
+.tray-card { display: grid; gap: 12px; padding: 14px; border-radius: 16px; background: var(--sign-soft); }
+.tray-card__head { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 32px; }
+.link-btn { padding: 4px 6px; border: 0; background: none; color: var(--sign); font-weight: 700; font-size: 14px; text-decoration: underline; cursor: pointer; }
+.tray { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.token {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 6px 10px 6px 14px;
+  border: 0; border-radius: 999px; background: var(--sign); color: var(--on-accent); font-weight: 700; cursor: pointer;
+}
+.token:hover { filter: brightness(1.08); }
+.tray__empty { color: var(--muted); font-size: 15px; }
+.tray__preview { font-size: calc(18px * var(--escala, 1)); font-weight: 600; line-height: 1.35; }
+.tray-card .btn:disabled { opacity: .45; }
+.quick { display: grid; gap: 14px; }
+.quick__group { display: grid; gap: 8px; }
+.quick__title { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.chip[data-sena="desde-hace"] { border-style: dashed; }
+.bubble__play {
+  display: grid; place-items: center; width: 32px; height: 32px; margin-left: auto; flex: none;
+  border-radius: 999px; border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); background: var(--surface); color: var(--accent); cursor: pointer;
+}
+.bubble__play:hover { background: var(--sunken); }
+.conf + .bubble__play { margin-left: 4px; }
+
+/* Diálogo «Desde hace…» */
+.stepper { display: flex; justify-content: center; align-items: center; gap: 20px; }
+.stepper .icon-btn { width: 56px; height: 56px; border-radius: 16px; }
+.stepper output { min-width: 3ch; text-align: center; font-family: var(--f-display); font-weight: 700; font-size: 44px; font-variant-numeric: tabular-nums; }
+.dur-preview { text-align: center; font-weight: 700; font-size: 18px; color: var(--sign) !important; }
+
+/* Diálogo de accesibilidad */
+.opt-group { display: grid; gap: 10px; margin: 0; padding: 14px 0 0; border: 0; border-top: 1px solid var(--line); }
+.opt-group legend { float: left; width: 100%; padding: 0; margin-bottom: 2px; font-weight: 700; }
+.opt-group .btn { justify-self: start; }
+.check { display: flex; gap: 10px; align-items: center; min-height: 44px; font-weight: 600; cursor: pointer; }
+.check input { width: 22px; height: 22px; flex: none; accent-color: var(--sign); }
+.range { width: 100%; min-height: 32px; accent-color: var(--sign); }
+.form-field output { color: var(--muted); font-variant-numeric: tabular-nums; }
 
 /* Selector segmentado (vista profesional / paciente) */
 .seg { display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: var(--sunken); }
@@ -556,12 +597,16 @@ button, input, select { font: inherit; color: inherit; }
 /* Vista del paciente: texto ampliado y controles simples (SRS 3.3.1) */
 .app.is-paciente .solo-profesional { display: none; }
 .app.is-paciente .bubble { max-width: min(620px, 94%); padding: 16px 20px 18px; }
-.app.is-paciente .bubble p { font-size: 26px; line-height: 1.3; }
+.app.is-paciente .bubble p { font-size: calc(26px * var(--escala, 1)); line-height: 1.3; }
 .app.is-paciente .bubble__meta { font-size: 15px; }
-.app.is-paciente .gloss { font-size: 15px; }
+.app.is-paciente .gloss { font-size: calc(15px * var(--escala, 1)); }
+.app.is-paciente .chip { min-height: 52px; padding: 10px 20px; font-size: 18px; }
+.app.is-paciente .tray__preview { font-size: calc(22px * var(--escala, 1)); }
 
 /* Diálogo de finalizar y aviso emergente */
 .dialog { width: min(440px, calc(100% - 32px)); padding: 0; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow-lg); }
+.dialog { max-height: calc(100dvh - 32px); overflow: auto; }
+.dialog--wide { width: min(520px, calc(100% - 32px)); }
 .dialog::backdrop { background: rgba(14, 26, 43, .55); }
 .dialog__body { display: grid; gap: 12px; padding: 28px; }
 .dialog__body h2 { font-size: 24px; }
@@ -622,3 +667,33 @@ button, input, select { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* ---------- 10. Accesibilidad: tamaño de texto y contraste alto (RF-15) ---------- */
+:root[data-texto="grande"] { --escala: 1.25; }
+:root[data-texto="muy-grande"] { --escala: 1.5; }
+
+:root[data-contraste="alto"] {
+  --bg: #FFFFFF; --surface: #FFFFFF; --sunken: #EDEDED; --ink: #000000; --muted: #1C1C1C; --line: #4D4D4D;
+  --sign: #0030A8; --sign-soft: #E3EAFF; --voice: #7A3000; --voice-soft: #FFEBDB;
+  --ok: #005C2E; --ok-soft: #DDF3E6; --danger: #9E0000; --danger-soft: #FFE5E5;
+  --band: #000000; --on-band: #FFFFFF; --on-band-muted: #E6E6E6;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-contraste="alto"]:not([data-theme="light"]) {
+    --bg: #000000; --surface: #000000; --sunken: #1A1A1A; --ink: #FFFFFF; --muted: #EDEDED; --line: #B3B3B3;
+    --sign: #A9C3FF; --sign-soft: #0B1A3D; --voice: #FFC08F; --voice-soft: #2E1704;
+    --ok: #7FE8B4; --ok-soft: #062616; --danger: #FFA39E; --danger-soft: #330705;
+    --band: #FFFFFF; --on-band: #000000; --on-band-muted: #1C1C1C; --on-accent: #000000;
+  }
+}
+:root[data-contraste="alto"][data-theme="dark"] {
+  --bg: #000000; --surface: #000000; --sunken: #1A1A1A; --ink: #FFFFFF; --muted: #EDEDED; --line: #B3B3B3;
+  --sign: #A9C3FF; --sign-soft: #0B1A3D; --voice: #FFC08F; --voice-soft: #2E1704;
+  --ok: #7FE8B4; --ok-soft: #062616; --danger: #FFA39E; --danger-soft: #330705;
+  --band: #FFFFFF; --on-band: #000000; --on-band-muted: #1C1C1C; --on-accent: #000000;
+}
+:root[data-contraste="alto"] .bubble,
+:root[data-contraste="alto"] .tray-card { border: 2px solid var(--accent, var(--sign)); }
+:root[data-contraste="alto"] .card,
+:root[data-contraste="alto"] .chip,
+:root[data-contraste="alto"] .btn--ghost { border-width: 2px; }

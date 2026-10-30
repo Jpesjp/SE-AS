@@ -2,6 +2,8 @@
    SeñaPuente · microfono.js
    Transcribe la voz del profesional y la escribe en el historial.
    Usa el reconocimiento de voz de Chrome o Edge (Web Speech API).
+   Se pausa solo mientras voz.js lee en voz alta un mensaje del
+   paciente, para no transcribir la voz del parlante.
 
    IMPORTANTE: Chrome no permite el reconocimiento de voz si abres
    index.html con doble clic (dirección file://). Ábrelo desde
@@ -22,6 +24,7 @@
   var rec = null;
   var escuchando = false;
   var hablando = false;     // el navegador detecta voz en este momento
+  var enPausa = false;      // pausado mientras se lee un mensaje del paciente
   var burbuja = null;       // burbuja del historial que se está llenando
   var textoParcial = '';    // último texto parcial reconocido
 
@@ -42,12 +45,18 @@
   function actualizarUI() {
     micBtn.setAttribute('aria-pressed', escuchando ? 'true' : 'false');
     micBtn.setAttribute('aria-label', escuchando ? 'Pausar micrófono' : 'Activar micrófono');
-    micLabel.textContent = escuchando ? 'Escuchando… toca para pausar' : 'Toca para hablar';
-    micHint.textContent = escuchando
-      ? 'Habla con naturalidad. El texto se escribe en el historial.'
-      : 'El texto aparecerá en el historial mientras hablas.';
-    estado.classList.toggle('is-live', escuchando);
-    estadoTexto.textContent = escuchando ? 'Transcribiendo' : 'Micrófono apagado';
+    if (escuchando && enPausa) {
+      micLabel.textContent = 'En pausa…';
+      micHint.textContent = 'Se está leyendo en voz alta el mensaje del paciente. Sigue al terminar.';
+    } else {
+      micLabel.textContent = escuchando ? 'Escuchando… toca para pausar' : 'Toca para hablar';
+      micHint.textContent = escuchando
+        ? 'Habla con naturalidad. El texto se escribe en el historial.'
+        : 'El texto aparecerá en el historial mientras hablas.';
+    }
+    estado.classList.toggle('is-live', escuchando && !enPausa);
+    estadoTexto.textContent = !escuchando ? 'Micrófono apagado'
+      : enPausa ? 'En pausa · leyendo al paciente' : 'Transcribiendo';
   }
 
   // Revisa, antes de empezar, si el navegador puede transcribir.
@@ -86,6 +95,7 @@
     rec.maxAlternatives = 1;
 
     rec.onresult = function (ev) {
+      if (enPausa) return;
       var parcial = '';
       for (var i = ev.resultIndex; i < ev.results.length; i++) {
         var resultado = ev.results[i];
@@ -114,7 +124,7 @@
     // Chrome corta el reconocimiento tras unos segundos de silencio: se reanuda.
     rec.onend = function () {
       hablando = false;
-      if (escuchando) {
+      if (escuchando && !enPausa) {
         try { rec.start(); } catch (e) { /* ya estaba iniciado */ }
       }
     };
@@ -136,6 +146,7 @@
   function detener() {
     escuchando = false;
     hablando = false;
+    enPausa = false;
     if (rec) {
       rec.onend = null;
       rec.onresult = null;
@@ -149,6 +160,30 @@
     }
     actualizarUI();
   }
+
+  /* ---------- Pausa mientras se lee al paciente ---------- */
+  function pausar() {
+    if (!escuchando || enPausa) return;
+    enPausa = true;
+    hablando = false;
+    // Lo que el profesional alcanzó a decir se conserva.
+    if (burbuja && textoParcial) cerrarBurbuja(textoParcial);
+    try { rec.abort(); } catch (e) {}
+    actualizarUI();
+  }
+  function reanudar() {
+    if (!escuchando || !enPausa) return;
+    enPausa = false;
+    actualizarUI();
+    // Pequeña espera para que el parlante termine de sonar.
+    setTimeout(function () {
+      if (!escuchando || enPausa || !rec) return;
+      try { rec.start(); } catch (e) { /* sigue activo: onend lo reinicia */ }
+    }, 300);
+  }
+  document.addEventListener('sp:voz', function (e) {
+    if (e.detail.hablando) pausar(); else reanudar();
+  });
 
   micBtn.addEventListener('click', function () { escuchando ? detener() : iniciar(); });
   idioma.addEventListener('change', function () { if (escuchando) { detener(); iniciar(); } });
