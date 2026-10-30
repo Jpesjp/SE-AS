@@ -7,18 +7,19 @@
    visibles en el navegador. Lo que protege la información son
    las reglas de Firestore (archivo firestore.rules).
 
-   Mientras apiKey diga "PEGA_AQUI", la app funciona en modo
+   Si apiKey dice "PEGA_AQUI", la app funciona en modo
    demostración: se puede entrar a la consulta sin cuenta.
    ========================================================== */
 window.SenaPuente = window.SenaPuente || {};
 
 window.SenaPuente.firebaseConfig = {
-  apiKey: 'PEGA_AQUI',
-  authDomain: '',
-  projectId: '',
-  storageBucket: '',
-  messagingSenderId: '',
-  appId: ''
+  apiKey: 'AIzaSyAyPxonpzTKFhSPUsvEZ-e0cM81WWQupTo',
+  authDomain: 'senapuente-b2cc4.firebaseapp.com',
+  projectId: 'senapuente-b2cc4',
+  storageBucket: 'senapuente-b2cc4.firebasestorage.app',
+  messagingSenderId: '432253660682',
+  appId: '1:432253660682:web:53d8268bfe275e67d079f3'
+  // measurementId no se incluye: la app no carga Google Analytics.
 };
 
 // Solo para pruebas en el computador con los emuladores de Firebase
